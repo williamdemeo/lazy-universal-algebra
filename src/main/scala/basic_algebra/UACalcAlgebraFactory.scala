@@ -66,12 +66,21 @@ object UACalcAlgebraFactory {
     *  val myAlg: BasicAlgebra = new BasicAlgebra("My Alg", 5, my_ops)
     *  ```
     */
-  def makeUACalcOperationFromScalaFunction(fn      : List[Int] => Int,
-                                           op_name : String,
-                                           arity   : Int,
-                                           algSize : Int ): UACalcOperation =
+  def makeUACalcOperationFromScalaFunction( fn      : List[Int] => Int,
+                                            op_name : String,
+                                            arity   : Int,
+                                            algSize : Int ): UACalcOperation =
     new AbstractOperation(op_name, arity, algSize) {
       override def intValueAt(args: Array[Int]): Int = fn(args.toList)
+      override def valueAt(list: JavaList[_]): AnyRef = ???
+    }
+
+  def makeUACalcOperationFromScalaList( fn      : List[Int],
+                                        op_name : String,
+                                        arity   : Int,
+                                        algSize : Int ): UACalcOperation =
+    new AbstractOperation(op_name, arity, algSize) {
+      override def intValueAt(arg: Int): Int = fn(arg)
       override def valueAt(list: JavaList[_]): AnyRef = ???
     }
 
