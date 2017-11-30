@@ -3,6 +3,7 @@ import org.uacalc.alg.BasicAlgebra
 import scala.collection.JavaConverters._
 import basic_algebra.UACalcAlgebraFactory._
 import org.uacalc.io.AlgebraIO
+import basic_algebra.UACalcAlgebraFactory._
 //import scala.collection.JavaConverters.seqAsJavaList
 //import org.uacalc.io.AlgebraIO
 //import org.uacalc.alg.Malcev.isCongruenceDistIdempotent
@@ -119,6 +120,45 @@ object AlgebraFactory {
   println("---- (4) Sanity check: we actually constructed something.")
   println("   myAlg3.getName() = " + myAlg3.getName())
   println("   myAlg3.universe() = " + myAlg3.universe())
+
+
+  println("==================================================")
+  println("EXAMPLE 4: Generating all 4-element idempotent groupoids.")
+  val arity2 = 2
+  val algSize4 = 4
+
+  println("\n(1) Form the list of all triples with values in {0,1,2}.")
+  val listOfArrays =
+    for {
+      i <- 0 until algSize
+      j <- 0 until algSize
+      k <- 0 until algSize
+      l <- 0 until algSize
+    } yield Array(i,j,k,l)
+
+  println("\n(2) Form the sequence of binary op tables, filtering out non-idempotent ones.")
+  lazy val idempotentTables: IndexedSeq[Array[Array[Int]]] =
+    for {
+      i <- listOfArrays
+      j <- listOfArrays
+      k <- listOfArrays
+      l <- listOfArrays
+      if (i(0)==0 && j(1)==1 && k(2)==2 && l(3) == 3)
+    } yield Array(i,j,k,l)
+
+  println("\n(3) Form sequence of algebras with tables from (2).")
+  lazy val UACalcGroupoidSeq: IndexedSeq[BasicAlgebra] =
+    for (ti <- idempotentTables.zipWithIndex) yield {
+      new BasicAlgebra(
+        "Grpoid"+ti._2,
+        algSize4,
+        seqAsJavaList(List(makeUACalcOperationFromScalaTable(ti._1, "*", arity2, algSize4)))
+      )
+    }
+
+  println("---- (4) Sanity check: we actually constructed something.")
+  println("   UACalcGroupoidSeq(0).getName() = " + UACalcGroupoidSeq(0).getName())
+  println("   UACalcGroupoidSeq(0).universe = " + UACalcGroupoidSeq(0).universe())
 
 }
 

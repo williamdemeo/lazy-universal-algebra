@@ -9,7 +9,7 @@ import org.uacalc.alg.Malcev.cubeTermBlockerIdempotent
 import org.uacalc.ui.tm.ProgressReport
 //import java.util.List
 
-import scalaz.Alpha.A
+//import scalaz.Alpha.A
 
 object combos {
 

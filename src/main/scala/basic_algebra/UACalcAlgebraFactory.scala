@@ -2,7 +2,8 @@ package basic_algebra
 
 
 
-import org.uacalc.alg.op.AbstractOperation
+import org.uacalc.alg.op.{AbstractOperation, OperationSymbol}
+import org.uacalc.alg.op.Operations.makeBinaryIntOperation
 
 import scala.collection.JavaConverters._
 
@@ -83,5 +84,12 @@ object UACalcAlgebraFactory {
       override def intValueAt(arg: Int): Int = fn(arg)
       override def valueAt(list: JavaList[_]): AnyRef = ???
     }
+
+  def makeUACalcOperationFromScalaTable( fn      : Array[Array[Int]],
+                                         op_name : String,
+                                         arity   : Int,
+                                         algSize : Int ): UACalcOperation =
+    makeBinaryIntOperation(new OperationSymbol(op_name, arity),algSize,fn)
+
 
 }
