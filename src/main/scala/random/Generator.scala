@@ -1,8 +1,5 @@
 package random
 
-import scala.collection.immutable.RedBlackTree.Tree
-
-
 trait Generator[+T] {
   //self =>  // an alias for "this".
 
@@ -102,26 +99,40 @@ object Generator {
     r <- intTreeGen
   } yield IntNode(l, v, r)
 
+
   //---- Random Generic Trees ----------------------
   trait Tree[T]
-
   case class Node[T](left: Tree[T], t: T, right: Tree[T]) extends Tree[T]
   case class Leaf[T](t: T) extends Tree[T]
 
-  def treeGen[T]: Generator[Tree[T]] = for {
+  // For this to work, T must be a type for which a generator exists,
+  // and we need to pass the T generator to treeGen as an argument.
+  def treeGen[T](tg: Generator[T]): Generator[Tree[T]] = for {
     isLeaf <- boolGen
-    tree <- if(isLeaf) leafGen[T] else nodeGen[T]
+    tree <- if(isLeaf) leafGen[T](tg) else nodeGen[T](tg)
   } yield tree
 
-  def leafGen[T]: Generator[Leaf[T]] = ???
+  def leafGen[T](tg: Generator[T]): Generator[Leaf[T]] = for { t <- tg } yield Leaf(t)
 
-  def nodeGen[T]: Generator[Node[T]] = ???
+  def nodeGen[T](tg: Generator[T]): Generator[Node[T]] = for {
+    l <- treeGen(tg)
+    t <- tg
+    r <- treeGen(tg)
+  } yield Node(l, t, r)
 
 
 
+  //---- Random Tests --------------------------------------------
+  def test[T](tgen: Generator[T], numTimes: Int = 100)(predicate: T => Boolean): Unit = {
+    for (_ <- 0 until numTimes) {
+      val randT = tgen.generate
+      assert(predicate(randT), "Test failed for value: "+randT)
+    }
+    println("Test passed "+numTimes+" times")
+  }
 
-  //  val pairs = new Generator[(Int, Int)] {
-//    override def generate: (Int, Int) = (integers.generate, integers.generate)
-//  }
-
+  //---- Example:
+  test(pairs(intListGen, intListGen)){
+    case(xs, ys) => (xs ++ ys).length > xs.length
+  }
 }

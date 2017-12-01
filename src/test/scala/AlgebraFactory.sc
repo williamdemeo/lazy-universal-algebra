@@ -6,10 +6,10 @@ import org.uacalc.io.AlgebraIO
 import basic_algebra.UACalcAlgebraFactory._
 //import scala.collection.JavaConverters.seqAsJavaList
 //import org.uacalc.io.AlgebraIO
-//import org.uacalc.alg.Malcev.isCongruenceDistIdempotent
-//import org.uacalc.alg.Malcev.isCongruenceModularIdempotent
-//import org.uacalc.alg.Malcev.cubeTermBlockerIdempotent
-//import org.uacalc.ui.tm.ProgressReport
+import org.uacalc.alg.Malcev.isCongruenceDistIdempotent
+import org.uacalc.alg.Malcev.isCongruenceModularIdempotent
+import org.uacalc.alg.Malcev.cubeTermBlockerIdempotent
+import org.uacalc.ui.tm.ProgressReport
 
 object AlgebraFactory {
 
@@ -127,38 +127,47 @@ object AlgebraFactory {
   val arity2 = 2
   val algSize4 = 4
 
-  println("\n(1) Form the list of all triples with values in {0,1,2}.")
-  val listOfArrays =
-    for {
-      i <- 0 until algSize
-      j <- 0 until algSize
-      k <- 0 until algSize
-      l <- 0 until algSize
-    } yield Array(i,j,k,l)
+  println("\n(1) Form the stream of all quadruples with values in {0,1,2,3}.")
+  lazy val streamOfArrays =
+    ( for {
+      i <- 0 until algSize4
+      j <- 0 until algSize4
+      k <- 0 until algSize4
+      l <- 0 until algSize4
+    } yield Array(i,j,k,l) ).toStream
 
   println("\n(2) Form the sequence of binary op tables, filtering out non-idempotent ones.")
-  lazy val idempotentTables: IndexedSeq[Array[Array[Int]]] =
-    for {
-      i <- listOfArrays
-      j <- listOfArrays
-      k <- listOfArrays
-      l <- listOfArrays
+  lazy val idempotentTables: Stream[Array[Array[Int]]] =
+    (for {
+      i <- streamOfArrays
+      j <- streamOfArrays
+      k <- streamOfArrays
+      l <- streamOfArrays
       if (i(0)==0 && j(1)==1 && k(2)==2 && l(3) == 3)
-    } yield Array(i,j,k,l)
+    } yield Array(i,j,k,l)).toStream
 
   println("\n(3) Form sequence of algebras with tables from (2).")
-  lazy val UACalcGroupoidSeq: IndexedSeq[BasicAlgebra] =
+  lazy val UACalcGroupoidStream: Stream[BasicAlgebra] =
     for (ti <- idempotentTables.zipWithIndex) yield {
       new BasicAlgebra(
-        "Grpoid"+ti._2,
+        "Grpoid-"+ti._2,
         algSize4,
         seqAsJavaList(List(makeUACalcOperationFromScalaTable(ti._1, "*", arity2, algSize4)))
       )
     }
 
   println("---- (4) Sanity check: we actually constructed something.")
-  println("   UACalcGroupoidSeq(0).getName() = " + UACalcGroupoidSeq(0).getName())
-  println("   UACalcGroupoidSeq(0).universe = " + UACalcGroupoidSeq(0).universe())
+  println("   UACalcGroupoidStream(0).getName() = " + UACalcGroupoidStream(0).getName())
+  println("   UACalcGroupoidStream(0).universe = " + UACalcGroupoidStream(0).universe())
+
+  val algWithProps = UACalcGroupoidStream.filter( A =>
+    isCongruenceModularIdempotent(A, new ProgressReport()) &&
+      isCongruenceDistIdempotent(A, new ProgressReport())
+      //&& cubeTermBlockerIdempotent(A, new ProgressReport()) != null
+  )(0)
+
+  println("   algWithProps.getName() = " + algWithProps.getName())
+
 
 }
 
