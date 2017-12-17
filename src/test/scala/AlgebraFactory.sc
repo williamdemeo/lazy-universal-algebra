@@ -128,7 +128,7 @@ object AlgebraFactory {
   val algSize4 = 4
 
   println("\n(1) Form the stream of all quadruples with values in {0,1,2,3}.")
-  lazy val streamOfArrays =
+  val streamOfArrays =
     ( for {
       i <- 0 until algSize4
       j <- 0 until algSize4
@@ -137,17 +137,17 @@ object AlgebraFactory {
     } yield Array(i,j,k,l) ).toStream
 
   println("\n(2) Form the sequence of binary op tables, filtering out non-idempotent ones.")
-  lazy val idempotentTables: Stream[Array[Array[Int]]] =
+  val idempotentTables: Stream[Array[Array[Int]]] =
     (for {
       i <- streamOfArrays
       j <- streamOfArrays
       k <- streamOfArrays
       l <- streamOfArrays
       if (i(0)==0 && j(1)==1 && k(2)==2 && l(3) == 3)
-    } yield Array(i,j,k,l)).toStream
+    } yield Array(i,j,k,l))
 
   println("\n(3) Form sequence of algebras with tables from (2).")
-  lazy val UACalcGroupoidStream: Stream[BasicAlgebra] =
+  val UACalcGroupoidStream: Stream[BasicAlgebra] =
     for (ti <- idempotentTables.zipWithIndex) yield {
       new BasicAlgebra(
         "Grpoid-"+ti._2,
@@ -160,12 +160,14 @@ object AlgebraFactory {
   println("   UACalcGroupoidStream(0).getName() = " + UACalcGroupoidStream(0).getName())
   println("   UACalcGroupoidStream(0).universe = " + UACalcGroupoidStream(0).universe())
 
-  val algWithProps = UACalcGroupoidStream.filter( A =>
+  val algWithProps: BasicAlgebra = UACalcGroupoidStream.filter( A =>
     isCongruenceModularIdempotent(A, new ProgressReport()) &&
-      isCongruenceDistIdempotent(A, new ProgressReport())
-      //&& cubeTermBlockerIdempotent(A, new ProgressReport()) != null
+      !isCongruenceDistIdempotent(A, new ProgressReport())
+      && cubeTermBlockerIdempotent(A, new ProgressReport()) != null
   )(0)
 
+  println("---- write the algebra to a UACalc file ----")
+  AlgebraIO.writeAlgebraFile(algWithProps, "CM-notCD-CTB.ua")
   println("   algWithProps.getName() = " + algWithProps.getName())
 
 
