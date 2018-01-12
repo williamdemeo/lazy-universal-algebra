@@ -160,13 +160,15 @@ object AlgebraFactory {
   println("   UACalcGroupoidStream(0).getName() = " + UACalcGroupoidStream(0).getName())
   println("   UACalcGroupoidStream(0).universe = " + UACalcGroupoidStream(0).universe())
 
-  val algWithProps = UACalcGroupoidStream.filter( A =>
+  val algWithProps = UACalcGroupoidStream.filter(A =>
     isCongruenceModularIdempotent(A, new ProgressReport()) &&
-      isCongruenceDistIdempotent(A, new ProgressReport())
-      //&& cubeTermBlockerIdempotent(A, new ProgressReport()) != null
-  )(0)
+      !isCongruenceDistIdempotent(A, new ProgressReport()) &&
+     cubeTermBlockerIdempotent(A, new ProgressReport()) != null
+  ).head
 
   println("   algWithProps.getName() = " + algWithProps.getName())
+  println("---- (7)(optional) write the algebra to a UACalc file ----")
+  AlgebraIO.writeAlgebraFile(algWithProps, "FourElmtGrpoid-CM-NoCubeTerm.ua")
 
 
 }
