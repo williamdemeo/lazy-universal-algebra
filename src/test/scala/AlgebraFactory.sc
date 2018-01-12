@@ -166,6 +166,7 @@ object AlgebraFactory {
      cubeTermBlockerIdempotent(A, new ProgressReport()) != null
   ).head
 
+
   println("   algWithProps.getName() = " + algWithProps.getName())
   println("---- (7)(optional) write the algebra to a UACalc file ----")
   AlgebraIO.writeAlgebraFile(algWithProps, "FourElmtGrpoid-CM-NoCubeTerm.ua")

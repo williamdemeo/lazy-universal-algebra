@@ -66,6 +66,21 @@ object Generator {
       tail <- intListGen
     } yield head :: tail
 
+
+  def fixedLengthIntListGen(len: Int): Generator[List[Int]] = {
+    def fixedLengthIntListGen_aux(n: Int, acc: Generator[List[Int]]): Generator[List[Int]] = len match {
+      case 0 => acc
+      case k => {
+        val acc_new = for {
+          head <- intGen
+          tail <- acc
+        } yield head :: tail
+        fixedLengthIntListGen_aux(k-1, acc_new)
+      }
+    }
+    fixedLengthIntListGen_aux(len, emptyListGen)
+  }
+
   //---- List of random length with random entries of type T.
   def listGen[T](t: Generator[T]): Generator[List[T]] =
     for {

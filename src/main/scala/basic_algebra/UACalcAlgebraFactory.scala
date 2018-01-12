@@ -1,13 +1,7 @@
 package basic_algebra
 
-
-
 import org.uacalc.alg.op.{AbstractOperation, OperationSymbol}
 import org.uacalc.alg.op.Operations.makeBinaryIntOperation
-
-import scala.collection.JavaConverters._
-
-//class UACalcAlgebraFactory {}
 
 object UACalcAlgebraFactory {
 
